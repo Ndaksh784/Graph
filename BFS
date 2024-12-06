@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_VERTICES 100
+
+// Define the structure for a node
+typedef struct node {
+    int vertex;
+    struct node* next;
+} node;
+
+// Define the structure for the graph
+typedef struct graph {
+    int numVertices;
+    node** adjLists;
+} graph;
+
+// Function to create a new node
+node* createNode(int vertex) {
+    node* newNode = (node*)malloc(sizeof(node));
+    newNode->vertex = vertex;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to create a graph
+graph* createGraph(int vertices) {
+    graph* g = (graph*)malloc(sizeof(graph));
+    g->numVertices = vertices;
+    g->adjLists = (node**)malloc(vertices * sizeof(node*));
+
+    for (int i = 0; i < vertices; i++) {
+        g->adjLists[i] = NULL;
+    }
+    return g;
+}
+
+// Function to add an edge in the graph
+void addEdge(graph* g, int src, int dest) {
+    // Add edge from src to dest
+    node* newNode = createNode(dest);
+    newNode->next = g->adjLists[src];
+    g->adjLists[src] = newNode;
+
+    // Add edge from dest to src (because the graph is undirected)
+    newNode = createNode(src);
+    newNode->next = g->adjLists[dest];
+    g->adjLists[dest] = newNode;
+}
+
+// BFS function to traverse the graph
+void bfs(graph* g, int startVertex) {
+    // Array to track visited vertices
+    int visited[MAX_VERTICES] = {0};
+    int queue[MAX_VERTICES];
+    int front = 0, rear = 0;
+
+    // Enqueue the starting vertex and mark it as visited
+    queue[rear++] = startVertex;
+    visited[startVertex] = 1;
+
+    printf("Breadth First Search starting from vertex %d:\n", startVertex);
+
+    while (front < rear) {
+        // Dequeue a vertex from the queue
+        int currentVertex = queue[front++];
+        printf("%d ", currentVertex);
+
+        // Traverse all the adjacent vertices of the current vertex
+        node* temp = g->adjLists[currentVertex];
+        while (temp) {
+            int adjVertex = temp->vertex;
+
+            // If the adjacent vertex has not been visited
+            if (!visited[adjVertex]) {
+                queue[rear++] = adjVertex;
+                visited[adjVertex] = 1;
+            }
+            temp = temp->next;
+        }
+    }
+
+    printf("\n");
+}
+
+int main() {
+    int vertices, edges, src, dest;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &vertices);
+
+    graph* g = createGraph(vertices);
+
+    printf("Enter the number of edges: ");
+    scanf("%d", &edges);
+
+    printf("Enter the edges (src dest):\n");
+    for (int i = 0; i < edges; i++) {
+        scanf("%d %d", &src, &dest);
+        addEdge(g, src, dest);
+    }
+
+    int startVertex;
+    printf("Enter the starting vertex for BFS: ");
+    scanf("%d", &startVertex);
+
+    bfs(g, startVertex);
+
+    return 0;
+}
